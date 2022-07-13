@@ -1,0 +1,36 @@
+version: "3"
+services:
+  chproxy:
+    image: contentsquareplatform/chproxy:1.15.0
+    container_name: chproxy
+    hostname: chproxy
+    command: ['-config', '/config.yml']
+    depends_on:
+      - "redis"
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config.yml:/config.yml
+      - ./data:/tmp
+    #network
+    networks:
+        - altinity_default
+
+  redis:
+    image: redis:6.2
+    container_name: redis
+    hostname: redis
+    ports:
+      - "6379:6379"
+    #user: "${UID}:${GID}"
+    user: "1000:1000"
+    volumes:
+      - ./data:/data
+        #- ./conf:/usr/local/etc/redis
+    #network
+    networks:
+        - altinity_default
+
+networks:
+  altinity_default:
+    external: true
