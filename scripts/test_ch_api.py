@@ -30,7 +30,7 @@ def api_fetch_rows(timestamp: str) -> tuple[None, None] | Exception:
         params = {
             "param_timestamp": f"{timestamp}",
             "query": "SELECT * FROM default.insert_test \
-                WHERE fecha_hora_pedido BETWEEN toDateTime({timestamp:DateTime}) - INTERVAL 5 minute AND toDateTime({timestamp:DateTime}) \
+                WHERE datetime_order BETWEEN toDateTime({timestamp:DateTime}) - INTERVAL 5 minute AND toDateTime({timestamp:DateTime}) \
                 FORMAT JSON",
             "buffer_size": "3000000",
             "wait_end_of_query": 1,
