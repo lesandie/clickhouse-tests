@@ -1,3 +1,4 @@
+import gzip
 
 import click
 from kafka import KafkaAdminClient, KafkaProducer
@@ -6,24 +7,12 @@ from kafka.errors import KafkaError
 
 # Click commands
 
+
 @click.command()
+@click.option("--server", help="Kafka server like host:port", required=True, type=str)
+@click.option("--topic", help="Name of the topic", required=True, type=str)
 @click.option(
-    "--server",
-    help="Kafka server like host:port",
-    required=True,
-    type=str
-)
-@click.option(
-    "--topic",
-    help="Name of the topic",
-    required=True,
-    type=str
-)
-@click.option(
-    "--file",
-    help="File with text messages to send",
-    required=True,
-    type=click.Path()
+    "--file", help="File with text messages to send", required=True, type=click.Path()
 )
 @click.option(
     "--delay",
@@ -31,7 +20,7 @@ from kafka.errors import KafkaError
     default=1,
     show_default=True,
     required=False,
-    type=int
+    type=int,
 )
 @click.option(
     "--batch",
@@ -39,7 +28,7 @@ from kafka.errors import KafkaError
     default=1,
     show_default=True,
     required=False,
-    type=int
+    type=int,
 )
 def kafka_producer(server, topic, file, delay, batch):
     """
@@ -62,7 +51,7 @@ def kafka_producer(server, topic, file, delay, batch):
             admin.create_topics([new_topic])
             topic = new_topic.name
 
-        with open(file, "r") as f:
+        with gzip.open(file, "rt") as f:
             for line in f:
                 print(line)
                 producer.send(topic=topic, value=line.encode("utf-8"))
@@ -70,8 +59,17 @@ def kafka_producer(server, topic, file, delay, batch):
 
     except KafkaError as kafka_error:
         print(f"Kafka error: {kafka_error}")
+
+    except gzip.BadGzipFile:
+        print("Not a valid gzip file, switching to uncompressed mode")
+        with open(file, "r") as f:
+            for line in f:
+                print(line)
+                producer.send(topic=topic, value=line.encode("utf-8"))
+                print(f"Produced: {line}")
+
     except Exception as error:
-        print(f"General error: {error} ")
+        print(f"General error: {error}")
 
 
 if __name__ == "__main__":
