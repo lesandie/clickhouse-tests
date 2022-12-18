@@ -1,0 +1,16 @@
+<yandex>
+    <named_collections>
+        <kafka1>
+            <kafka_broker_list>SASL_PLAINTEXT://cp-kafka:9093</kafka_broker_list>
+            <kafka_topic_list>kerberos_test</kafka_topic_list>
+            <kafka_group_name>kerberos_group</kafka_group_name>
+            <kafka>
+                <security_protocol>SASL_PLAINTEXT</security_protocol>
+                <sasl_mechanism>GSSAPI</sasl_mechanism>
+                <sasl_kerberos_keytab>/var/lib/clickhouse/user_files/clickhouse.keytab</sasl_kerberos_keytab>
+                <sasl_kerberos_principal>user1@ALTINITY.TEST</sasl_kerberos_principal>
+                <debug>all</debug>
+            </kafka>
+        </kafka1>
+    </named_collections>
+</yandex>

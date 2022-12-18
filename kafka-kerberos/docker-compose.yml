@@ -1,0 +1,94 @@
+version: "3.7"
+services:
+  
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: cp-zookeeper
+    hostname: cp-zookeeper
+    depends_on: 
+      - kerberos
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_AUTHPROVIDER_SASL: org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/zookeeper/secrets/zookeeper_jaas.conf -Djava.security.krb5.conf=/etc/zookeeper/secrets/krb5.conf
+    ports:
+      - 22181:2181
+    volumes:
+      - ./configs/secrets:/etc/zookeeper/secrets
+    networks:
+      - altinity_default
+  
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: cp-kafka
+    hostname: cp-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - 29092:29092
+      - 29093:29093
+    environment:
+      KAFKA_BROKER_ID: "1"
+      KAFKA_ZOOKEEPER_CONNECT: cp-zookeeper:2181
+      KAFKA_SASL_ENABLED_MECHANISMS: GSSAPI
+      KAFKA_SASL_KERBEROS_SERVICE_NAME: kafka
+      # https://docs.confluent.io/platform/current/kafka/multi-node.html#configure-multi-node-environment
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL_PLAIN://cp-kafka:9092,INTERNAL_SASL://cp-kafka:9093,EXTERNAL_PLAIN://localhost:29092,EXTERNAL_SASL://localhost:29093
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL_PLAIN
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL_PLAIN:PLAINTEXT,INTERNAL_SASL:SASL_PLAINTEXT,EXTERNAL_PLAIN:PLAINTEXT,EXTERNAL_SASL:SASL_PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/broker_jaas.conf -Djava.security.krb5.conf=/etc/kafka/secrets/krb5.conf
+    volumes:
+      - ./configs/secrets:/etc/kafka/secrets
+    networks:
+      - altinity_default
+  
+  kerberos:
+    container_name: kdc-server
+    hostname: kdc-server
+    image: altinity/kdc-server:latest
+    volumes:
+      # This is needed otherwise there won't be enough entropy to generate a new kerberos realm
+      - /dev/urandom:/dev/random
+      - ./configs/secrets:/tmp/secrets
+    ports:
+      - "749:749"
+      - "88:88/udp"
+    networks:
+        - altinity_default
+
+  clickhouse-test:
+    image: clickhouse/clickhouse-server:22.3
+    container_name: clickhouse-22.3
+    hostname: clickhouse-22.3
+    depends_on:
+      - kafka
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+      - "9099:9009"
+    #user: "${UID}:${GID}"
+    user: "1000:1000"
+    environment:
+      - "KRB5_CONFIG=/var/lib/clickhouse/user_files/krb5.conf"
+    volumes:
+      - ./configs/config.d:/etc/clickhouse-server/config.d
+      - ./configs/users.d:/etc/clickhouse-server/users.d
+      - ./configs/log:/var/log/clickhouse-server
+      - ./configs/chdata:/var/lib/clickhouse
+      # kerberos container will copy krb5.conf to configs/secrets exposed as user_files for clickhouse
+      - ./configs/secrets:/var/lib/clickhouse/user_files
+    #OS ulimits
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 262144
+        hard: 262144
+    networks:
+        - altinity_default
+
+networks:
+  altinity_default:
+    external: true
+

@@ -1,5 +1,5 @@
 
-# Altinity-ClickHouse tests and misc info
+# Altinity-ClickHouse tests and misc info (updated December 2022)
 
 ## chproxy load test
 
@@ -12,3 +12,7 @@ testing the gRPC interface
 ## Misc scripts
 
 Some python scripts to insert data using the HTTP API, native python driver and clickhouse-client
+
+## Kerberized Kafka deployment for ClickHouse
+
+More info in the `kafka-kerberos` folder
