@@ -4,19 +4,9 @@ import subprocess
 CH_HOST = os.environ["CH_HOST"]
 
 
-def check_filepath(filepath) -> bool:
-    """
-    Checks if the input path is correct and a file exists
-    """
+def clickhouse_client(host: str, port: str, query: str, input_file: str) -> str | None:
+
     if os.path.isfile(filepath):
-        return True
-    else:
-        return False
-
-
-def clickhouse_client(host: str, port: str, query: str, input_file: str) -> None:
-
-    if check_filepath(input_file):
         try:
             command = f'/usr/bin/cat {input_file} | /usr/bin/clickhouse-client --host {host} --port {port} --query="{query}"'
             result = subprocess.run(
