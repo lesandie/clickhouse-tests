@@ -24,7 +24,7 @@ tee /etc/krb5.conf <<EOF
 [libdefaults]
     default_realm = $REALM
     dns_lookup_realm = false
-    dns_lookup_kdc = false
+    dns_lookup_kdc = true
     forwardable = true
     # WARNING: We use weaker key types to simplify testing as stronger key types
     # require the enhanced security JCE policy file to be installed. You should
@@ -97,11 +97,11 @@ echo ""
 echo "==================================================================================="
 echo "==== Creating kafka related principals ============================================"
 echo "==================================================================================="
-kadmin.local -q "addprinc -randkey zookeeper/cp-zookeeper.altinity_default@${REALM}"
-kadmin.local -q "ktadd -norandkey -k /tmp/secrets/kerberized_zookeeper.keytab zookeeper/cp-zookeeper.altinity_default@${REALM}"
+kadmin.local -q "addprinc -randkey zookeeper/cp-zookeeper.${DOMAIN_REALM}@${REALM}"
+kadmin.local -q "ktadd -norandkey -k /tmp/secrets/kerberized_zookeeper.keytab zookeeper/cp-zookeeper.${DOMAIN_REALM}@${REALM}"
 
-kadmin.local -q "addprinc -randkey kafka/cp-kafka.altinity_default@${REALM}"
-kadmin.local -q "ktadd -norandkey -k /tmp/secrets/kerberized_kafka.keytab kafka/cp-kafka.altinity_default@${REALM}"
+kadmin.local -q "addprinc -randkey kafka/cp-kafka.${DOMAIN_REALM}@${REALM}"
+kadmin.local -q "ktadd -norandkey -k /tmp/secrets/kerberized_kafka.keytab kafka/cp-kafka.${DOMAIN_REALM}@${REALM}"
 
 kadmin.local -q "addprinc -randkey zkclient@${REALM}"
 kadmin.local -q "ktadd -norandkey -k /tmp/secrets/zkclient.keytab zkclient@${REALM}"

@@ -58,27 +58,24 @@ services:
     networks:
         - altinity_default
 
-  clickhouse-test:
-    image: clickhouse/clickhouse-server:22.3
-    container_name: clickhouse-22.3
-    hostname: clickhouse-22.3
+  clickhouse:
+    image: clickhouse/clickhouse-server:22.8
+    container_name: clickhouse-22.8
+    hostname: clickhouse
     depends_on:
       - kafka
     ports:
-      - "8123:8123"
-      - "9000:9000"
-      - "9099:9009"
+      - "8122:8123"
+      - "9002:9000"
+      - "9092:9009"
     #user: "${UID}:${GID}"
     user: "1000:1000"
     environment:
       - "KRB5_CONFIG=/var/lib/clickhouse/user_files/krb5.conf"
     volumes:
-      - ./configs/config.d:/etc/clickhouse-server/config.d
-      - ./configs/users.d:/etc/clickhouse-server/users.d
-      - ./configs/log:/var/log/clickhouse-server
-      - ./configs/chdata:/var/lib/clickhouse
-      # kerberos container will copy krb5.conf to configs/secrets exposed as user_files for clickhouse
+      - ./configs/clickhouse.d:/etc/clickhouse-server/config.d
       - ./configs/secrets:/var/lib/clickhouse/user_files
+      - ./:/var/log/clickhouse-server
     #OS ulimits
     ulimits:
       nproc: 65535
@@ -91,4 +88,3 @@ services:
 networks:
   altinity_default:
     external: true
-
