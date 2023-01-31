@@ -48,14 +48,15 @@ def api_insert_rows(file: str) -> str | Exception:
         headers = {"Content-type": "text/csv"}
         #  headers = {"Content-Type": "text/tab-separated-values; charset=UTF-8"}
         params = {
-                "query": 'INSERT INTO default.insert_test \
+            "query": "INSERT INTO default.insert_test \
                     (id_order, id_plat, id_warehouse, id_product, order_type, order_status, \
-                    datetime_order, units, total) FORMAT CSVWithNames',
-                "max_insert_block_size": 1000000,
+                    datetime_order, units, total) FORMAT CSVWithNames",
+                
+            #"max_insert_block_size": 1000000,
             "max_insert_threads": 2,
-            "format_csv_allow_single_quotes": 0,
-            "format_csv_allow_double_quotes": 0,
-            #"buffer_size": "3000000",
+            #"format_csv_allow_single_quotes": 0,
+            "format_csv_allow_double_quotes": 1,
+            "buffer_size": "3000000",
             "wait_end_of_query": 1,
             "send_progress_in_http_headers": "1",
         }
@@ -75,6 +76,6 @@ if __name__ == "__main__":
 
     result_select = api_fetch_rows(timestamp="2020-10-26 00:00:00")
     result_insert = api_insert_rows(
-        file="../csv/fact_sales_withnames.csv"
+        file="./file.csv"
     )
     print(result_select, result_insert)
