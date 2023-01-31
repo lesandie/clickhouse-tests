@@ -10,7 +10,7 @@ CREATE TABLE default.insert_test
     `units` Int16,
     `total` Float32
 )
-ENGINE = MergeTree
+ENGINE = ReplacingMergeTree()
 ORDER BY (id_order, id_plat, id_warehouse)
 PARTITION BY tuple()
 

@@ -18,7 +18,7 @@ def api_fetch_rows(timestamp: str) -> str | Exception:
         params = {
             "param_timestamp": f"{timestamp}",
             "query": "SELECT * FROM default.insert_test \
-                WHERE fecha_hora_pedido BETWEEN toDateTime({timestamp:DateTime}) - INTERVAL 5 minute AND toDateTime({timestamp:DateTime}) \
+                WHERE datetime_order BETWEEN toDateTime({timestamp:DateTime}) - INTERVAL 5 minute AND toDateTime({timestamp:DateTime}) \
                 FORMAT JSON",
             # "max_result_bytes": "4000000",
             "buffer_size": "3000000",
@@ -52,11 +52,11 @@ def api_insert_rows(file: str) -> str | Exception:
                     (id_order, id_plat, id_warehouse, id_product, order_type, order_status, \
                     datetime_order, units, total) FORMAT CSVWithNames",
                 
-            #"max_insert_block_size": 1000000,
+            "max_insert_block_size": 1000000,
             "max_insert_threads": 2,
-            #"format_csv_allow_single_quotes": 0,
-            "format_csv_allow_double_quotes": 1,
-            "buffer_size": "3000000",
+            #"format_csv_allow_single_quotes": 1, #not default
+            "format_csv_allow_double_quotes": 1, #default
+            "input_format_skip_unknown_fields": 1,
             "wait_end_of_query": 1,
             "send_progress_in_http_headers": "1",
         }
