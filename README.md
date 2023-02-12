@@ -1,5 +1,5 @@
 
-# Altinity-ClickHouse tests and misc info (updated December 2022)
+# Altinity-ClickHouse tests and misc info (updated February 2023)
 
 ## chproxy load test
 
