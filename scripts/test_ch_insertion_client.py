@@ -5,8 +5,7 @@ CH_HOST = os.environ["CH_HOST"]
 
 
 def clickhouse_client(host: str, port: str, query: str, input_file: str) -> str | None:
-
-    if os.path.isfile(filepath):
+    if os.path.isfile(input_file):
         try:
             command = f'/usr/bin/cat {input_file} | /usr/bin/clickhouse-client --host {host} --port {port} --query="{query}"'
             result = subprocess.run(
@@ -22,8 +21,7 @@ def clickhouse_client(host: str, port: str, query: str, input_file: str) -> str 
 
 
 if __name__ == "__main__":
-
-    input_file = "../csv/fact_sales_withnames.csv"
+    input_file = "./file.csv"
     host = CH_HOST
     port = "9000"
     query = "INSERT INTO tests.insert_test FORMAT CSVWithNames"

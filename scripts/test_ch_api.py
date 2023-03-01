@@ -1,13 +1,12 @@
 import json
 import os
-from typing import Tuple
 
 import requests
 
 CH_API_HOST = os.environ["CH_API_HOST"]
 
 
-def api_fetch_rows(timestamp: str) -> str | Exception:
+def api_fetch_rows(timestamp: str) -> str | None:
     """
     Execute queries via the API using buffering
     """
@@ -29,15 +28,15 @@ def api_fetch_rows(timestamp: str) -> str | Exception:
         response = requests.get(url, headers=headers, params=params)
 
         response_dict = dict(response.headers)
-        response_dict["status_code"] = response.status_code
+        response_dict["status_code"] = str(response.status_code)
 
         return json.dumps(response_dict, indent=2)
 
     except Exception as e:
-        return e
+        print(e)
 
 
-def api_insert_rows(file: str) -> str | Exception:
+def api_insert_rows(file: str) -> str | None:
     """
     Insert using POST in binary format
     """
@@ -51,12 +50,11 @@ def api_insert_rows(file: str) -> str | Exception:
             "query": "INSERT INTO default.insert_test \
                     (id_order, id_plat, id_warehouse, id_product, order_type, order_status, \
                     datetime_order, units, total) FORMAT CSVWithNames",
-                
             "max_insert_block_size": 1000000,
             "max_insert_threads": 2,
-            #"format_csv_allow_single_quotes": 1, #not default
-            "format_csv_allow_double_quotes": 1, #default
-            "input_format_skip_unknown_fields": 1,
+            "format_csv_allow_single_quotes": 0,
+            "format_csv_allow_double_quotes": 0,
+            # "buffer_size": "3000000",
             "wait_end_of_query": 1,
             "send_progress_in_http_headers": "1",
         }
@@ -65,17 +63,15 @@ def api_insert_rows(file: str) -> str | Exception:
             response = requests.post(url, headers=headers, params=params, data=f)
 
             response_dict = dict(response.headers)
-            response_dict["status_code"] = response.status_code
+            response_dict["status_code"] = str(response.status_code)
 
             return json.dumps(response_dict, indent=2)
 
     except Exception as e:
-        return e
+        print(e)
+
 
 if __name__ == "__main__":
-
     result_select = api_fetch_rows(timestamp="2020-10-26 00:00:00")
-    result_insert = api_insert_rows(
-        file="./file.csv"
-    )
+    result_insert = api_insert_rows(file="./file.csv")
     print(result_select, result_insert)

@@ -1,11 +1,38 @@
 import os
 from csv import DictReader
 from datetime import datetime
+from logging.config import dictConfig
 from typing import Generator, List
 
 from clickhouse_driver import Client
 
 CH_HOST = os.environ["CH_HOST"]
+
+SETTINGS = {
+    "send_timeout": 900,
+    "send_logs_level": "trace",
+}
+
+# dict for logging
+dictConfig(
+    {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "standard": {"format": "%(asctime)s %(levelname)-8s %(name)s: %(message)s"},
+        },
+        "handlers": {
+            "default": {
+                "level": "INFO",
+                "formatter": "standard",
+                "class": "logging.StreamHandler",
+            },
+        },
+        "loggers": {
+            "": {"handlers": ["default"], "level": "INFO", "propagate": True},
+        },
+    }
+)
 
 
 def iter_csv(filepath: str) -> Generator:
@@ -14,27 +41,28 @@ def iter_csv(filepath: str) -> Generator:
     """
     if os.path.isfile(filepath):
         converters = {
-        "id_order": int,
-        "id_plat": int,
-        "id_warehouse": int,
-        "id_product": int,
-        "order_type": str,
-        "order_status": str,
-        "datetime_order": lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S"),
-        "units": int,
-        "total": float,
-    }
+            "id_order": int,
+            "id_plat": int,
+            "id_warehouse": int,
+            "id_product": int,
+            "order_type": str,
+            "order_status": str,
+            "datetime_order": lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S"),
+            "units": int,
+            "total": float,
+        }
         with open(filepath, "r") as fd:
             reader = DictReader(fd)
             for line in reader:
                 yield {
-                    k: (converters[k](v) if k in converters else v) for k, v in line.items()
+                    k: (converters[k](v) if k in converters else v)
+                    for k, v in line.items()
                 }
     else:
         print("File does not exist!: enter the correct path")
 
 
-def native_insert_rows(filepath: str) -> List | None:
+def native_insert_rows(filepath: str):
     """
     Insert using native driver
     Alternative with URL client = Client.from_url("clickhouse://localhost:9000/default")
@@ -52,18 +80,18 @@ def native_insert_rows(filepath: str) -> List | None:
         print(e)
 
 
-def native_fetch_rows() -> List | None:
+def native_fetch_rows():
     """
     Insert using native driver
     """
     try:
         client = Client(host=CH_HOST, port=9000, user="default", password="")
-        return client.execute("SELECT * FROM insert_test LIMIT 100")
+        return client.execute("SELECT * FROM insert_test LIMIT 100", settings=SETTINGS)
     except Exception as e:
         print(e)
 
 
 if __name__ == "__main__":
-
-    native_insert_rows(filepath="../fixtures/fact_sales_100k_withnames.csv")
-    native_fetch_rows()
+    insert = native_insert_rows(filepath="..file.csv")
+    select = native_fetch_rows()
+    print(insert, select)
