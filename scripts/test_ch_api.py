@@ -19,10 +19,11 @@ def api_fetch_rows(timestamp: str) -> str | None:
             "query": "SELECT * FROM default.insert_test \
                 WHERE datetime_order BETWEEN toDateTime({timestamp:DateTime}) - INTERVAL 5 minute AND toDateTime({timestamp:DateTime}) \
                 FORMAT JSON",
-            # "max_result_bytes": "4000000",
+            "max_result_bytes": "4000000",
             "buffer_size": "3000000",
             "wait_end_of_query": 1,
-            "send_progress_in_http_headers": "1",
+            "send_progress_in_http_headers": 1,  # sending progress will help the network middleware to keep alive the connection, by updating the packet TTL.
+            "http_headers_progress_interval_ms": 10000,  # Do not send HTTP headers X-ClickHouse-Progress more frequently than at each specified interval.
         }
 
         response = requests.get(url, headers=headers, params=params)
@@ -54,9 +55,9 @@ def api_insert_rows(file: str) -> str | None:
             "max_insert_threads": 2,
             "format_csv_allow_single_quotes": 0,
             "format_csv_allow_double_quotes": 0,
-            # "buffer_size": "3000000",
-            "wait_end_of_query": 1,
             "send_progress_in_http_headers": "1",
+            "send_progress_in_http_headers": 1,  # sending progress will help the network middleware to keep alive the connection, by updating the packet TTL.
+            "http_headers_progress_interval_ms": 10000,  # Do not send HTTP headers X-ClickHouse-Progress more frequently than at each specified interval.
         }
 
         with open(file, "rb") as f:
