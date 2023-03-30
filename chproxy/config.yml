@@ -104,7 +104,7 @@ server:
     # Each item may contain IP address, IP subnet mask or a name
     # from `network_groups`.
     # By default requests are accepted from all the IPs.
-    allowed_networks: ["default", "127.0.0.0/8", "pro"]
+    allowed_networks: ["default", "127.0.0.0/8", "cassius"]
 
     # ReadTimeout is the maximum duration for proxy to reading the entire
     # request, including the body.
@@ -146,7 +146,7 @@ server:
   # Access to `/metrics` endpoint may be restricted in this section.
   # By default access to `/metrics` is unrestricted.
   metrics:
-    allowed_networks: ["default", "pro"]
+    allowed_networks: ["default", "cassius"]
 
 # Configs for input users.
 users:
@@ -203,9 +203,10 @@ users:
     #max_queue_time: 35s
 
   - name: "default"
+    password: ""
     to_cluster: "c2x2"
     to_user: "default"
-    allowed_networks: ["default", "pro"]
+    allowed_networks: ["default", "cassius"]
 
     # The maximum number of concurrently running queries for the user.
     #
@@ -240,9 +241,9 @@ clusters:
     # Requests are evenly distributed among them.
 
     replicas:
-      - name: "replica01"
+      - name: "shard01"
         nodes: ["clickhouse-01:8123", "clickhouse-02:8123"]
-      - name: "replica02"
+      - name: "shard02"
         nodes: ["clickhouse-04:8123", "clickhouse-04:8123"]
 
     # DEPRECATED: Each cluster node is checked for availability using this interval.
@@ -273,13 +274,14 @@ clusters:
     # By default `default` user is used.
     kill_query_user:
       name: "default"
-      password:
+      password: ""
 
     # Configuration for cluster users.
     users:
         # The user name is used in `to_user`.
       - name: "default"
-
+        # No need to do this, empty password will be sent
+        password: ""
           # - name: "second cluster"
           # scheme: "https"
 
