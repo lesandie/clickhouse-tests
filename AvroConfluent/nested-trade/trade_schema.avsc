@@ -1,0 +1,25 @@
+{
+    "type": "record",
+    "name": "Nested_Array_Maps",
+    "fields": [
+        {"name": "tradeIdentifier", "type": "string"},
+        {"name": "deskFlowId", "type": ["null", "long"]},
+        {"name": "timestamp", "type": ["null", "long"]},
+        {"name": "baseTradeLevel", "type": ["null", "double"]},
+        {"name": "genericTradeMap", "type": ["null", {"type": "map", "values": "string"}]},
+        {
+            "name": "genericTradeArr",
+            "type": {
+                "type": "array",
+                "items": {
+                    "type": "record",
+                    "name": "array_map",
+                    "fields": [
+                        {"name": "source", "type": ["null", "string"]},
+                        {"name": "epochSeconds", "type": ["null", "long"]}
+                    ]
+                }
+            }
+        }
+    ]
+}
