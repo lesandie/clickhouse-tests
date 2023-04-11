@@ -1,12 +1,10 @@
 
 !.gitignore
 !sample/
-.terraform*
-*.tfstate*
 .vscode
-fixtures/
 .pre-commit-config.yaml
 .idea
-fixtures/
 __pycache__
 __gen
+.flake8
+.vscode/

@@ -1,5 +1,5 @@
 
-# Altinity-ClickHouse tests and misc info (updated February 2023)
+# Altinity-ClickHouse tests and misc info (updated April 2023)
 
 ## chproxy load test
 
@@ -16,3 +16,7 @@ Some python scripts to insert data using the HTTP API, native python driver and 
 ## Kerberized Kafka deployment for ClickHouse
 
 More info in the `kafka-kerberos` folder
+
+## Avro serialization examples for ClickHouse
+
+Check AvroConfluent/README-AVRO.md
