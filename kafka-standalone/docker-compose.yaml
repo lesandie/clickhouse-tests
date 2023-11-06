@@ -1,0 +1,69 @@
+
+version: '3'
+services:
+
+  clickhouse-server:
+    #image: altinity/clickhouse-server:22.8.15.25.altinitystable
+    image: clickhouse/clickhouse-server:23.9
+    container_name: clickhouse
+    hostname: clickhouse
+    depends_on:
+      - kafka
+    ports:
+      - "18123:8123"
+      - "19000:9000"
+      #- "19009:9009"
+    #user: "${UID}:${GID}"
+    user: "1000:1000"
+    volumes:
+      - ./config/config.d:/etc/clickhouse-server/config.d
+      - ./config/users.d:/etc/clickhouse-server/users.d
+      - ./logs:/var/log/clickhouse-server
+      - ./data:/var/lib/clickhouse
+      - ./files:/var/lib/clickhouse/user_files
+    #OS ulimits
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 262144
+        hard: 262144
+    networks:
+        - altinity_default
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: cp-zookeeper
+    hostname: cp-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 2181:2181
+    networks:
+        - altinity_default
+  
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: cp-kafka
+    hostname: cp-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - 29092:29092
+      - 9092:9092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: cp-zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://cp-kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    networks:
+      - altinity_default
+
+networks:
+  altinity_default:
+    external: true
