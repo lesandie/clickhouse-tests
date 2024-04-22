@@ -2,7 +2,6 @@
 !.gitignore
 !sample/
 .vscode
-.pre-commit-config.yaml
 .idea
 __pycache__
 __gen
