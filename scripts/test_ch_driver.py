@@ -2,10 +2,12 @@ import os
 from csv import DictReader
 from datetime import datetime
 from logging.config import dictConfig
-from typing import Generator, List
+from typing import Generator
 
 from clickhouse_driver import Client
 
+# Environment variables
+# export CH_HOST="localhost"
 CH_HOST = os.environ["CH_HOST"]
 
 SETTINGS = {
@@ -13,7 +15,7 @@ SETTINGS = {
     "send_logs_level": "trace",
 }
 
-# dict for logging
+# dict for logging SET send_logs_level = 'debug';
 dictConfig(
     {
         "version": 1,
@@ -29,7 +31,7 @@ dictConfig(
             },
         },
         "loggers": {
-            "": {"handlers": ["default"], "level": "INFO", "propagate": True},
+            "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
         },
     }
 )
@@ -45,7 +47,7 @@ def iter_csv(filepath: str) -> Generator:
             "id_plat": int,
             "id_warehouse": int,
             "id_product": int,
-            "order_type": str,
+            "order_type": int,
             "order_status": str,
             "datetime_order": lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S"),
             "units": int,
@@ -92,6 +94,6 @@ def native_fetch_rows():
 
 
 if __name__ == "__main__":
-    insert = native_insert_rows(filepath="..file.csv")
+    insert = native_insert_rows(filepath="./file.csv")
     select = native_fetch_rows()
     print(insert, select)
