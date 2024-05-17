@@ -1,6 +1,6 @@
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-from datetime import time
+from datetime import datetime, time
 import clickhouse_connect
 import csv
 
@@ -10,7 +10,11 @@ PORT = 8123
 USER = "default"
 PASSWORD = ""
 # dictionary for passing settings to ClickHouse
-SETTINGS = {"session_id": "random-" + "-" + f"{time()}"}
+SETTINGS = {
+    "session_id": "random-" + "-" + f"{time()}",
+    # Add more settings here if needed
+    "date_time_input_format": "best_effort",
+}
 
 
 def execute_query_sync(client, query):
@@ -36,10 +40,14 @@ def execute_insert_sync(client):
         data = [row for row in csv_reader]
 
     prepared_data = []
-    for row in data:
+    for row in data[1:]:  # Skip the header row
+        # Convert the datetime string to a datetime object
+        row["datetime_order"] = datetime.strptime(
+            row["datetime_order"], "%Y-%m-%d %H:%M:%S"
+        )
         prepared_data.append(list(row.values()))
 
-    # Insert the data into the ClickHouse table ... do some batching
+    # Insert the data into the ClickHouse table ... WIP to the reader: do some batching here
     client.insert(
         database="default",
         table="insert_test",
@@ -68,6 +76,11 @@ def execute_insert_sync(client):
         ],
         settings=SETTINGS,
     )
+
+    result = client.query(
+        "SELECT * FROM insert_test ORDER BY datetime_order DESC LIMIT 1"
+    )
+    return result
 
 
 async def execute_query_async(client, query):
@@ -98,9 +111,9 @@ async def main():
     )
     query = "SELECT * FROM system.query_log ORDER BY event_time DESC LIMIT 10"  # Example query
     result = await execute_query_async(client, query)
-    print(result.first_row)
+    print("SELECT result", result.first_row)
     result_insert = await execute_insert_async(client)
-    print(result_insert)
+    print("INSERT result", result_insert.first_row)
 
 
 # Run the async main function
